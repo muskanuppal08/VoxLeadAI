@@ -41,6 +41,9 @@
       <span id="agentStateBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">
         Idle
       </span>
+      <span id="bantBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/30">
+        BANT: 0/100
+      </span>
     </div>
   </header>
 
@@ -358,6 +361,14 @@
         case 'flush_audio_buffer':
           flushAudioQueue();
           break;
+
+        case 'tool_executed':
+          renderToolExecutedBadge(data.toolName, data.result);
+          break;
+
+        case 'qualification_updated':
+          updateBantScoreBadge(data.qualification);
+          break;
       }
     }
 
@@ -411,6 +422,38 @@
       bubble.appendChild(content);
       msgDiv.appendChild(bubble);
       messagesContainer.appendChild(msgDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function updateBantScoreBadge(qualification) {
+      const badge = document.getElementById('bantBadge');
+      if (badge && qualification) {
+        badge.textContent = `BANT: ${qualification.bantScore}/100`;
+        if (qualification.bantScore >= 70) {
+          badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse';
+        } else if (qualification.bantScore >= 40) {
+          badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        }
+      }
+    }
+
+    function renderToolExecutedBadge(toolName, result) {
+      const badgeDiv = document.createElement('div');
+      badgeDiv.className = 'flex justify-center my-2';
+      
+      let text = `⚡ Executed: ${toolName}`;
+      if (toolName === 'search_company_info') {
+        text = `🔍 Knowledge Grounding: Searched "${result?.title || 'Company Info'}"`;
+      } else if (toolName === 'book_calendar_appointment') {
+        text = `📅 Demo Booked: ${result?.date} at ${result?.time} (Link generated)`;
+      }
+
+      badgeDiv.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono bg-indigo-950/80 text-indigo-300 border border-indigo-700/50 shadow-sm">
+          ${text}
+        </span>
+      `;
+      messagesContainer.appendChild(badgeDiv);
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
