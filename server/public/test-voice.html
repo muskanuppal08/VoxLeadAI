@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SalesPilot AI - Voice Pipeline Console</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .animate-pulse-ring {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+  <!-- Top Navigation -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+          SalesPilot AI <span class="text-xs bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono">Module 1: Voice Engine</span>
+        </h1>
+        <p class="text-xs text-slate-400">Low-Latency Duplex Voice Engine (Deepgram + GPT-4o-mini + ElevenLabs)</p>
+      </div>
+    </div>
+
+    <!-- Status Badge -->
+    <div class="flex items-center space-x-3">
+      <span id="connectionBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+        <span class="w-2 h-2 rounded-full bg-rose-400"></span> Disconnected
+      </span>
+      <span id="agentStateBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">
+        Idle
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column: Audio Visualizer & Call Controls -->
+    <div class="lg:col-span-1 flex flex-col gap-6">
+      <!-- Voice Orb & Visualizer Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-xl">
+        <div id="orbContainer" class="relative my-8 flex items-center justify-center">
+          <div id="orbGlow" class="absolute w-36 h-36 rounded-full bg-indigo-600/30 blur-2xl transition-all duration-300"></div>
+          <div id="orbCore" class="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center shadow-2xl transition-all duration-300">
+            <svg id="orbIcon" class="w-12 h-12 text-white transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Live Audio Waveform Canvas -->
+        <div class="w-full h-16 bg-slate-950/80 rounded-xl border border-slate-800/80 overflow-hidden px-2 flex items-center">
+          <canvas id="waveformCanvas" class="w-full h-full"></canvas>
+        </div>
+
+        <p id="micStatusText" class="text-xs text-slate-400 mt-3 text-center">Microphone inactive. Click "Start Discovery Call" below.</p>
+      </div>
+
+      <!-- Controls Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col gap-3">
+        <h3 class="text-sm font-semibold text-slate-300">Call Controls</h3>
+        
+        <button id="btnToggleCall" class="w-full py-3 px-4 rounded-xl font-medium text-sm flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition-all active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+          Start Discovery Call
+        </button>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btnMuteMic" disabled class="py-2.5 px-3 rounded-lg font-medium text-xs flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+            Mute Mic
+          </button>
+          
+          <button id="btnInterrupt" disabled class="py-2.5 px-3 rounded-lg font-medium text-xs flex items-center justify-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Interrupt Agent
+          </button>
+        </div>
+
+        <!-- Optional Text Message Input for Testing -->
+        <div class="mt-4 pt-4 border-t border-slate-800 flex flex-col gap-2">
+          <label class="text-xs text-slate-400 font-medium">Text Input Simulator (Optional)</label>
+          <div class="flex gap-2">
+            <input id="textInputSimulator" type="text" placeholder="Type query (e.g., 'What is your pricing?')..." class="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+            <button id="btnSendText" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-medium rounded-lg text-slate-200 border border-slate-700">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Live Transcription Stream & Call Transcript -->
+    <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col overflow-hidden shadow-xl">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          Live Conversation Stream
+        </h2>
+        <span class="text-xs text-slate-500">Multilingual (English & Hindi)</span>
+      </div>
+
+      <!-- Messages Scroll Area -->
+      <div id="messagesContainer" class="flex-1 p-6 overflow-y-auto space-y-4 max-h-[540px]">
+        <div class="text-center py-12 text-slate-500 text-sm">
+          Click <span class="text-indigo-400 font-medium">"Start Discovery Call"</span> to begin the real-time voice session.
+        </div>
+      </div>
+
+      <!-- Live Interim Captions Bar -->
+      <div class="p-4 bg-slate-950/80 border-t border-slate-800 flex items-center gap-3">
+        <span class="text-xs font-mono uppercase tracking-wider text-slate-500">Live:</span>
+        <div id="liveCaptionText" class="text-xs text-indigo-300 italic truncate flex-1">
+          Waiting for speech...
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // State Variables
+    let ws = null;
+    let audioContext = null;
+    let micStream = null;
+    let scriptProcessor = null;
+    let isConnected = false;
+    let isMuted = false;
+    let audioQueue = [];
+    let isPlayingAudio = false;
+
+    // UI Elements
+    const btnToggleCall = document.getElementById('btnToggleCall');
+    const btnMuteMic = document.getElementById('btnMuteMic');
+    const btnInterrupt = document.getElementById('btnInterrupt');
+    const connectionBadge = document.getElementById('connectionBadge');
+    const agentStateBadge = document.getElementById('agentStateBadge');
+    const messagesContainer = document.getElementById('messagesContainer');
+    const liveCaptionText = document.getElementById('liveCaptionText');
+    const micStatusText = document.getElementById('micStatusText');
+    const orbGlow = document.getElementById('orbGlow');
+    const orbCore = document.getElementById('orbCore');
+    const textInputSimulator = document.getElementById('textInputSimulator');
+    const btnSendText = document.getElementById('btnSendText');
+    const canvas = document.getElementById('waveformCanvas');
+    const canvasCtx = canvas.getContext('2d');
+
+    // Canvas resize
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+
+    // Visualizer Bars Animation
+    let visualizerData = new Uint8Array(32);
+    let analyser = null;
+
+    function drawWaveform() {
+      requestAnimationFrame(drawWaveform);
+      canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (analyser) {
+        analyser.getByteFrequencyData(visualizerData);
+      } else {
+        visualizerData.fill(0);
+      }
+
+      const barWidth = (canvas.width / 32) - 2;
+      for (let i = 0; i < 32; i++) {
+        const barHeight = (visualizerData[i] / 255) * canvas.height * 0.9;
+        canvasCtx.fillStyle = isConnected ? '#818cf8' : '#334155';
+        canvasCtx.fillRect(i * (barWidth + 2), canvas.height - barHeight, barWidth, barHeight);
+      }
+    }
+    drawWaveform();
+
+    // Toggle Call Button
+    btnToggleCall.addEventListener('click', () => {
+      if (!isConnected) {
+        startCall();
+      } else {
+        endCall();
+      }
+    });
+
+    // Mute Button
+    btnMuteMic.addEventListener('click', () => {
+      isMuted = !isMuted;
+      btnMuteMic.textContent = isMuted ? 'Unmute Mic' : 'Mute Mic';
+      btnMuteMic.classList.toggle('text-rose-400', isMuted);
+    });
+
+    // Interrupt Button
+    btnInterrupt.addEventListener('click', () => {
+      if (ws && isConnected) {
+        ws.send(JSON.stringify({ type: 'user_interrupt' }));
+        flushAudioQueue();
+        updateAgentState('interrupted');
+      }
+    });
+
+    // Send Text Input
+    btnSendText.addEventListener('click', () => {
+      const text = textInputSimulator.value.trim();
+      if (text && ws && isConnected) {
+        ws.send(JSON.stringify({ type: 'text_input', text }));
+        textInputSimulator.value = '';
+      }
+    });
+    textInputSimulator.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') btnSendText.click();
+    });
+
+    async function startCall() {
+      try {
+        btnToggleCall.disabled = true;
+        btnToggleCall.textContent = 'Connecting...';
+
+        // 1. Establish WebSocket connection
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/call?leadName=AlexTest&company=ApexCorp`;
+        ws = new WebSocket(wsUrl);
+
+        ws.onopen = async () => {
+          isConnected = true;
+          updateConnectionState(true);
+          btnToggleCall.disabled = false;
+          btnToggleCall.textContent = 'End Call';
+          btnToggleCall.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+          btnToggleCall.classList.add('bg-rose-600', 'hover:bg-rose-500');
+          btnMuteMic.disabled = false;
+          btnInterrupt.disabled = false;
+
+          // Clear welcome message
+          messagesContainer.innerHTML = '';
+
+          // 2. Start Microphone capture
+          await initMicrophone();
+        };
+
+        ws.onmessage = async (event) => {
+          const data = JSON.parse(event.data);
+          handleServerMessage(data);
+        };
+
+        ws.onclose = () => {
+          endCall();
+        };
+
+        ws.onerror = (err) => {
+          console.error('WebSocket Error:', err);
+          endCall();
+        };
+
+      } catch (err) {
+        console.error('Failed to start call:', err);
+        alert('Could not start call: ' + err.message);
+        endCall();
+      }
+    }
+
+    async function initMicrophone() {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 } });
+      
+      const source = audioContext.createMediaStreamSource(micStream);
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 64;
+      source.connect(analyser);
+
+      // ScriptProcessor to downsample / convert to 16-bit PCM
+      scriptProcessor = audioContext.createScriptProcessor(2048, 1, 1);
+      scriptProcessor.onaudioprocess = (e) => {
+        if (!isConnected || isMuted) return;
+        const inputData = e.inputBuffer.getChannelData(0);
+        // Convert Float32 to 16-bit PCM Linear
+        const pcm16 = new Int16Array(inputData.length);
+        for (let i = 0; i < inputData.length; i++) {
+          const s = Math.max(-1, Math.min(1, inputData[i]));
+          pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        }
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(pcm16.buffer);
+        }
+      };
+
+      source.connect(scriptProcessor);
+      scriptProcessor.connect(audioContext.destination);
+      micStatusText.textContent = '🎙️ Microphone streaming active (16kHz Mono PCM)';
+    }
+
+    function endCall() {
+      isConnected = false;
+      updateConnectionState(false);
+      updateAgentState('idle');
+
+      if (ws) {
+        try { ws.close(); } catch(e) {}
+        ws = null;
+      }
+
+      if (micStream) {
+        micStream.getTracks().forEach(track => track.stop());
+        micStream = null;
+      }
+      if (scriptProcessor) {
+        try { scriptProcessor.disconnect(); } catch(e) {}
+        scriptProcessor = null;
+      }
+      if (audioContext) {
+        try { audioContext.close(); } catch(e) {}
+        audioContext = null;
+      }
+      analyser = null;
+
+      flushAudioQueue();
+
+      btnToggleCall.disabled = false;
+      btnToggleCall.textContent = 'Start Discovery Call';
+      btnToggleCall.classList.remove('bg-rose-600', 'hover:bg-rose-500');
+      btnToggleCall.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+      btnMuteMic.disabled = true;
+      btnInterrupt.disabled = true;
+      micStatusText.textContent = 'Microphone inactive.';
+    }
+
+    function handleServerMessage(data) {
+      switch (data.type) {
+        case 'call_connected':
+          console.log('Call connected:', data);
+          break;
+
+        case 'transcript_interim':
+          liveCaptionText.textContent = `"${data.text}"`;
+          break;
+
+        case 'transcript_final':
+          liveCaptionText.textContent = 'Waiting for speech...';
+          appendMessage(data.speaker, data.text);
+          break;
+
+        case 'agent_status_change':
+          updateAgentState(data.status);
+          break;
+
+        case 'agent_audio_chunk':
+          if (data.audio) {
+            enqueueAudio(data.audio);
+          }
+          break;
+
+        case 'flush_audio_buffer':
+          flushAudioQueue();
+          break;
+      }
+    }
+
+    function updateConnectionState(active) {
+      if (active) {
+        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Connected`;
+        connectionBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+      } else {
+        connectionBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span> Disconnected`;
+        connectionBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20';
+      }
+    }
+
+    function updateAgentState(status) {
+      agentStateBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      if (status === 'speaking') {
+        agentStateBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 animate-pulse';
+        orbGlow.className = 'absolute w-44 h-44 rounded-full bg-indigo-500/50 blur-2xl transition-all duration-300 animate-pulse-ring';
+      } else if (status === 'thinking') {
+        agentStateBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        orbGlow.className = 'absolute w-36 h-36 rounded-full bg-amber-500/40 blur-2xl transition-all duration-300';
+      } else if (status === 'listening') {
+        agentStateBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+        orbGlow.className = 'absolute w-36 h-36 rounded-full bg-emerald-500/30 blur-2xl transition-all duration-300';
+      } else {
+        agentStateBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700';
+        orbGlow.className = 'absolute w-36 h-36 rounded-full bg-indigo-600/30 blur-2xl transition-all duration-300';
+      }
+    }
+
+    function appendMessage(speaker, text) {
+      const isAgent = speaker === 'agent';
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `flex flex-col ${isAgent ? 'items-start' : 'items-end'}`;
+
+      const bubble = document.createElement('div');
+      bubble.className = `max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-md ${
+        isAgent 
+          ? 'bg-slate-800 text-slate-100 border border-slate-700 rounded-tl-sm' 
+          : 'bg-indigo-600 text-white rounded-tr-sm'
+      }`;
+
+      const speakerLabel = document.createElement('div');
+      speakerLabel.className = 'text-[10px] font-semibold uppercase tracking-wider mb-1 ' + (isAgent ? 'text-indigo-400' : 'text-indigo-200');
+      speakerLabel.textContent = isAgent ? 'Alex (SalesPilot Agent)' : 'You (Prospect)';
+
+      const content = document.createElement('div');
+      content.textContent = text;
+
+      bubble.appendChild(speakerLabel);
+      bubble.appendChild(content);
+      msgDiv.appendChild(bubble);
+      messagesContainer.appendChild(msgDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Audio Playback Queue
+    let playbackAudioCtx = null;
+    let currentSourceNode = null;
+
+    function enqueueAudio(base64Data) {
+      audioQueue.push(base64Data);
+      if (!isPlayingAudio) {
+        playNextAudioChunk();
+      }
+    }
+
+    async function playNextAudioChunk() {
+      if (audioQueue.length === 0) {
+        isPlayingAudio = false;
+        return;
+      }
+
+      isPlayingAudio = true;
+      const base64Data = audioQueue.shift();
+
+      try {
+        if (!playbackAudioCtx) {
+          playbackAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        const binary = atob(base64Data);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+
+        const audioBuffer = await playbackAudioCtx.decodeAudioData(bytes.buffer.slice(0));
+        currentSourceNode = playbackAudioCtx.createBufferSource();
+        currentSourceNode.buffer = audioBuffer;
+        currentSourceNode.connect(playbackAudioCtx.destination);
+
+        currentSourceNode.onended = () => {
+          playNextAudioChunk();
+        };
+
+        currentSourceNode.start(0);
+      } catch (err) {
+        console.error('Error decoding audio chunk:', err);
+        playNextAudioChunk();
+      }
+    }
+
+    function flushAudioQueue() {
+      audioQueue = [];
+      if (currentSourceNode) {
+        try { currentSourceNode.stop(); } catch(e) {}
+        currentSourceNode = null;
+      }
+      isPlayingAudio = false;
+    }
+  </script>
+</body>
+</html>
