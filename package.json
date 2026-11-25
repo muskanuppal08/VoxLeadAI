@@ -1,0 +1,10 @@
+{
+  "name": "voxleadai-workspace",
+  "version": "1.0.0",
+  "description": "VoxLeadAI - Autonomous AI Sales Voice Agent Monorepo",
+  "scripts": {
+    "server": "cd server && node --watch server.js",
+    "client": "cd client && npm run dev",
+    "build": "cd client && npm run build"
+  }
+}
