@@ -8,6 +8,9 @@
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991?logo=openai&logoColor=white)](https://openai.com/)
 [![ElevenLabs](https://img.shields.io/badge/ElevenLabs-Turbo_v2.5-000000?logo=elevenlabs&logoColor=white)](https://elevenlabs.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Technical Report](https://img.shields.io/badge/Report-1--Page%20Executive%20Evaluation-blue?logo=read-the-docs&logoColor=white)](PROJECT_REPORT.md)
+
+> 📄 **Technical Reviewers:** Please see the formal **[1-Page Executive Project Report (PROJECT_REPORT.md)](PROJECT_REPORT.md)** for commercial feasibility, operating economics (\$0.02/min), security compliance, and 100,000-user scalability analysis.
 
 ---
 
