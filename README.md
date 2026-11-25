@@ -45,11 +45,12 @@
 
 - [x] **Phase 1: Project Architecture & Environment Scaffolding**
   - Modular project structure, environment configuration, and logging infrastructure.
-- [ ] **Phase 2 (In Progress - 50% Pushed): Real-Time Voice Streaming Gateway**
+- [x] **Phase 2 (Completed): Real-Time Voice Streaming Gateway (Module 1)**
   - [x] Node.js WebSocket gateway (`/ws/call`) with session connection lifecycle.
   - [x] Interactive browser-based Web Audio visualizer and test console (`/test-voice`).
   - [x] Voice agent persona and conversational guardrail prompt engineering.
-  - [ ] *[Next Push]* Deepgram STT, ElevenLabs TTS, and sentence-boundary streaming pipeline.
+  - [x] Deepgram Nova-2 STT streaming, ElevenLabs TTS streaming, and sentence-boundary chunking.
+  - [x] Barge-in speech onset detection and instant audio buffer cancellation.
 - [ ] **Phase 3: RAG Knowledge Base & Google Calendar Tool Calling**
 - [ ] **Phase 4: Full React Dashboard, Lead CRM & Analytics**
 - [ ] **Phase 5: BullMQ Async Summaries & Enterprise Hardening**
