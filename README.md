@@ -26,7 +26,49 @@
 
 ---
 
-## 🛠️ Architecture & Technology Stack
+## 🛠️ System Architecture & Technology Stack
+
+```mermaid
+flowchart TB
+    subgraph Client ["1. Presentation Layer (React.js + Tailwind)"]
+        UI["Web Dashboard & CRM View"]
+        WebAudio["Web Audio API (16kHz PCM & AnalyserNode)"]
+        Subtitles["Live Streaming Captions"]
+    end
+
+    subgraph Gateway ["2. Real-Time Gateway (Node.js & Express)"]
+        WSS["WebSocket Server (/ws/call)"]
+        Session["Call Session State Machine (Listening/Thinking/Speaking)"]
+        VAD["Voice Activity Detection (Barge-in Interruption)"]
+        WSS <--> Session <--> VAD
+    end
+
+    subgraph AIOrchestration ["3. AI Intelligence & Tool Calling"]
+        STT["Deepgram Nova-2 (Bilingual STT)"]
+        LLM["OpenAI GPT-4o-mini (Sentence Chunking)"]
+        TTS["ElevenLabs Turbo v2.5 / Web Speech Engine"]
+        ToolRouter["Tool Execution Dispatcher"]
+        
+        Session <--> STT
+        STT --> LLM
+        LLM --> ToolRouter
+        LLM --> TTS
+        TTS --> Session
+    end
+
+    subgraph Integrations ["4. Business Integrations & Data"]
+        KnowledgeStore["Grounded Company Knowledge Store"]
+        CalendarAPI["Google Calendar Service (Meet Links)"]
+        CRMDB["Leads & BANT CRM Store"]
+        
+        ToolRouter <--> KnowledgeStore
+        ToolRouter <--> CalendarAPI
+        ToolRouter <--> CRMDB
+    end
+
+    WebAudio <== "Bi-directional WebSocket" ==> WSS
+    UI <== "REST API (/api/v1)" ==> Gateway
+```
 
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
@@ -51,7 +93,12 @@
   - [x] Voice agent persona and conversational guardrail prompt engineering.
   - [x] Deepgram Nova-2 STT streaming, ElevenLabs TTS streaming, and sentence-boundary chunking.
   - [x] Barge-in speech onset detection and instant audio buffer cancellation.
-- [ ] **Phase 3: RAG Knowledge Base & Google Calendar Tool Calling**
+- [ ] **Phase 3 (In Progress - 50% Pushed): AI Tool Calling & Grounded Discovery (Module 2)**
+  - [x] Verified company knowledge grounding store (Pricing tiers, Features, Security/HIPAA specs).
+  - [x] Google Calendar demo availability checking & appointment booking engine with Google Meet links.
+  - [x] Function calling JSON schemas for `search_company_info`, `check_calendar_availability`, and `book_calendar_appointment`.
+  - [x] BANT lead qualification scoring algorithm (0–100 scale).
+  - [ ] *[Next Push]* Full React Dashboard, Leads CRM table, and live UI badges.
 - [ ] **Phase 4: Full React Dashboard, Lead CRM & Analytics**
 - [ ] **Phase 5: BullMQ Async Summaries & Enterprise Hardening**
 

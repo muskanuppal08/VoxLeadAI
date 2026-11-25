@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url';
 import { config } from './src/config/env.js';
 import { logger } from './src/utils/logger.js';
 import { VoiceWebSocketServer } from './src/websocket/wsServer.js';
+import { calendarService } from './src/services/calendar.service.js';
+import { knowledgeService } from './src/services/knowledge.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,6 +35,22 @@ app.get('/api/v1/health', (req, res) => {
       elevenlabsVoice: config.elevenlabs.voiceId,
     },
     activeVoiceSessions: voiceWsServer ? voiceWsServer.getActiveSessionsCount() : 0,
+  });
+});
+
+// Appointments REST Endpoint
+app.get('/api/v1/appointments', (req, res) => {
+  res.json({
+    success: true,
+    appointments: calendarService.getAppointments(),
+  });
+});
+
+// Knowledge Docs REST Endpoint
+app.get('/api/v1/knowledge', (req, res) => {
+  res.json({
+    success: true,
+    documents: knowledgeService.documents,
   });
 });
 
