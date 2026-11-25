@@ -135,10 +135,12 @@
     let audioContext = null;
     let micStream = null;
     let scriptProcessor = null;
+    let speechRecognition = null;
     let isConnected = false;
     let isMuted = false;
     let audioQueue = [];
     let isPlayingAudio = false;
+    let hasReceivedRemoteAudio = false;
 
     // UI Elements
     const btnToggleCall = document.getElementById('btnToggleCall');
@@ -296,6 +298,36 @@
       source.connect(scriptProcessor);
       scriptProcessor.connect(audioContext.destination);
       micStatusText.textContent = '🎙️ Microphone streaming active (16kHz Mono PCM)';
+
+      // Browser Speech Recognition for instant voice input
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        speechRecognition = new SpeechRec();
+        speechRecognition.continuous = true;
+        speechRecognition.interimResults = true;
+        speechRecognition.lang = 'en-US';
+
+        speechRecognition.onresult = (event) => {
+          if (!isConnected || isMuted) return;
+          let interim = '';
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              const finalTxt = event.results[i][0].transcript.trim();
+              if (finalTxt && ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'text_input', text: finalTxt }));
+              }
+            } else {
+              interim += event.results[i][0].transcript;
+            }
+          }
+          if (interim) {
+            liveCaptionText.textContent = `"${interim}"`;
+          }
+        };
+
+        speechRecognition.onerror = (e) => console.log('Speech rec error:', e);
+        try { speechRecognition.start(); } catch(e) {}
+      }
     }
 
     function endCall() {
@@ -311,6 +343,10 @@
       if (micStream) {
         micStream.getTracks().forEach(track => track.stop());
         micStream = null;
+      }
+      if (speechRecognition) {
+        try { speechRecognition.stop(); } catch(e) {}
+        speechRecognition = null;
       }
       if (scriptProcessor) {
         try { scriptProcessor.disconnect(); } catch(e) {}
@@ -346,6 +382,9 @@
         case 'transcript_final':
           liveCaptionText.textContent = 'Waiting for speech...';
           appendMessage(data.speaker, data.text);
+          if (data.speaker === 'agent' && !hasReceivedRemoteAudio) {
+            speakAloud(data.text);
+          }
           break;
 
         case 'agent_status_change':
@@ -354,6 +393,7 @@
 
         case 'agent_audio_chunk':
           if (data.audio) {
+            hasReceivedRemoteAudio = true;
             enqueueAudio(data.audio);
           }
           break;
@@ -510,7 +550,30 @@
         try { currentSourceNode.stop(); } catch(e) {}
         currentSourceNode = null;
       }
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
       isPlayingAudio = false;
+    }
+
+    function speakAloud(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Samantha') || v.name.includes('Natural') || v.name.includes('Alex') || v.name.includes('Google')));
+      if (preferred) utterance.voice = preferred;
+
+      utterance.onstart = () => {
+        updateAgentState('speaking');
+      };
+      utterance.onend = () => {
+        updateAgentState('listening');
+      };
+      window.speechSynthesis.speak(utterance);
     }
   </script>
 </body>
