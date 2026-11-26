@@ -33,11 +33,11 @@ export default function Knowledge() {
       <div>
         <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
           Company Knowledge Grounding Store
-          <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30">
+          <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/30">
             Zero Hallucination
           </span>
         </h1>
-        <p className="text-xs text-slate-400 mt-1">Grounded documents dynamically retrieved by Alex using tool calling during live conversations.</p>
+        <p className="text-xs text-slate-400 mt-1">Grounded documents dynamically retrieved by Arohi using tool calling during live conversations.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

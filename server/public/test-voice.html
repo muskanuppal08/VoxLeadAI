@@ -229,7 +229,7 @@
 
         // 1. Establish WebSocket connection
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/ws/call?leadName=AlexTest&company=ApexCorp`;
+        const wsUrl = `${protocol}//${window.location.host}/ws/call?leadName=ArohiTest&company=ApexCorp`;
         ws = new WebSocket(wsUrl);
 
         ws.onopen = async () => {
@@ -453,7 +453,7 @@
 
       const speakerLabel = document.createElement('div');
       speakerLabel.className = 'text-[10px] font-semibold uppercase tracking-wider mb-1 ' + (isAgent ? 'text-indigo-400' : 'text-indigo-200');
-      speakerLabel.textContent = isAgent ? 'Alex (SalesPilot Agent)' : 'You (Prospect)';
+      speakerLabel.textContent = isAgent ? 'Arohi (VoxLead Agent)' : 'You (Prospect)';
 
       const content = document.createElement('div');
       content.textContent = text;
@@ -564,7 +564,7 @@
       utterance.pitch = 1.0;
 
       const voices = window.speechSynthesis.getVoices();
-      const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Samantha') || v.name.includes('Natural') || v.name.includes('Alex') || v.name.includes('Google')));
+      const preferred = voices.find(v => (v.lang.startsWith('en') || v.lang.startsWith('hi')) && (v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Google UK English Female') || v.name.includes('Google US English') || v.name.includes('Natural') || v.name.includes('Zira') || v.name.includes('Karen')));
       if (preferred) utterance.voice = preferred;
 
       utterance.onstart = () => {

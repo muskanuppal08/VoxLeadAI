@@ -58,7 +58,7 @@ export default function Appointments() {
               {appointments.length} Confirmed
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">Autonomous demo scheduling executed by Alex using calendar tool calling.</p>
+          <p className="text-xs text-slate-400 mt-1">Autonomous demo scheduling executed by Arohi using calendar tool calling.</p>
         </div>
 
         <button
@@ -101,7 +101,7 @@ export default function Appointments() {
               href={appt.meetingLink}
               target="_blank"
               rel="noreferrer"
-              className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition active:scale-95"
+              className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-600 hover:from-violet-500 hover:to-rose-500 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-lg shadow-fuchsia-600/25 transition active:scale-95"
             >
               <Video className="w-3.5 h-3.5" />
               Join Google Meet Demo

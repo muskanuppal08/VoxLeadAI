@@ -70,7 +70,7 @@ export class CallSession {
   }
 
   async sendInitialGreeting() {
-    const greetingText = "Hello! Thanks for connecting with VoxLeadAI. I'm Alex. How can I help optimize your sales pipeline today?";
+    const greetingText = "Hello! Thanks for connecting with VoxLeadAI. I'm Arohi. How can I help optimize your sales pipeline today?";
     this.conversationHistory.push({ role: 'assistant', content: greetingText });
     
     this.sendJson({

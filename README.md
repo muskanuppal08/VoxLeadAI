@@ -16,7 +16,7 @@
 
 ## 🌟 Project Overview
 
-**VoxLeadAI** solves the critical speed-to-lead and SDR qualification bottleneck in B2B sales. In modern sales environments, inbound leads left unattended for even 30 minutes experience a 21x drop in qualification likelihood. VoxLeadAI acts as a 24/7 autonomous sales development executive ("Alex") that immediately initiates or receives calls with prospects.
+**VoxLeadAI** solves the critical speed-to-lead and SDR qualification bottleneck in B2B sales. In modern sales environments, inbound leads left unattended for even 30 minutes experience a 21x drop in qualification likelihood. VoxLeadAI acts as a 24/7 autonomous sales development executive ("Arohi") that immediately initiates or receives calls with prospects.
 
 ### Core Capabilities:
 - **Ultra-Low Latency Conversational Voice:** Sub-900ms round-trip speech interaction using streaming STT, sentence-boundary LLM token pipelining, and streaming TTS.

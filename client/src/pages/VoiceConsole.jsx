@@ -79,7 +79,7 @@ export default function VoiceConsole() {
       hasReceivedRemoteAudioRef.current = false;
 
       // 1. Establish WebSocket connection to backend
-      const wsUrl = `ws://localhost:5001/ws/call?leadName=AlexTest&company=ApexCorp`;
+      const wsUrl = `ws://localhost:5001/ws/call?leadName=ArohiTest&company=ApexCorp`;
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
@@ -332,36 +332,50 @@ export default function VoiceConsole() {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.05;
     utterance.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => (v.lang.startsWith('en') || v.lang.startsWith('hi')) && (
+      v.name.includes('Samantha') || 
+      v.name.includes('Victoria') || 
+      v.name.includes('Google UK English Female') || 
+      v.name.includes('Google US English') || 
+      v.name.includes('Natural') || 
+      v.name.includes('Zira') || 
+      v.name.includes('Veena') ||
+      v.name.includes('Karen')
+    ));
+    if (preferred) utterance.voice = preferred;
+
     utterance.onstart = () => setAgentStatus('speaking');
     utterance.onend = () => setAgentStatus('listening');
     window.speechSynthesis.speak(utterance);
   };
 
-  // Dynamic Orb Color Classes
+  // Dynamic Orb Color Classes with Arohi Theme
   const getOrbClasses = () => {
     if (agentStatus === 'speaking') {
       return {
-        glow: 'w-48 h-48 bg-indigo-500/50 blur-3xl animate-pulse-ring',
-        core: 'from-indigo-500 via-purple-600 to-pink-500 shadow-indigo-500/50 scale-105',
-        badge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 animate-pulse',
+        glow: 'w-52 h-52 bg-fuchsia-500/40 blur-3xl animate-pulse-ring',
+        core: 'from-violet-500 via-fuchsia-600 to-rose-500 shadow-fuchsia-500/50 scale-105',
+        badge: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/40 animate-pulse',
       };
     }
     if (agentStatus === 'thinking') {
       return {
-        glow: 'w-40 h-40 bg-amber-500/40 blur-2xl',
-        core: 'from-amber-500 via-orange-600 to-yellow-500 shadow-amber-500/40 scale-100',
+        glow: 'w-44 h-44 bg-amber-500/40 blur-2xl',
+        core: 'from-amber-500 via-orange-500 to-yellow-500 shadow-amber-500/40 scale-100',
         badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
       };
     }
     if (agentStatus === 'listening') {
       return {
-        glow: 'w-44 h-44 bg-emerald-500/40 blur-2xl',
-        core: 'from-emerald-500 via-teal-600 to-cyan-500 shadow-emerald-500/40 scale-100',
+        glow: 'w-48 h-48 bg-emerald-500/40 blur-2xl',
+        core: 'from-emerald-500 via-teal-500 to-cyan-500 shadow-emerald-500/40 scale-100',
         badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
       };
     }
     return {
-      glow: 'w-36 h-36 bg-slate-700/30 blur-2xl',
+      glow: 'w-36 h-36 bg-slate-700/20 blur-2xl',
       core: 'from-slate-700 to-slate-800 shadow-none scale-95 opacity-60',
       badge: 'bg-slate-800 text-slate-400 border-slate-700',
     };
@@ -376,8 +390,8 @@ export default function VoiceConsole() {
         <div>
           <h1 className="text-lg font-bold text-white flex items-center gap-2">
             Live Autonomous Voice Console
-            <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              Agent Alex
+            <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40">
+              Agent Arohi
             </span>
           </h1>
           <p className="text-xs text-slate-400">Low-latency duplex phone call with automatic BANT qualification & demo booking</p>
@@ -429,10 +443,10 @@ export default function VoiceConsole() {
           <div className="glass-card rounded-3xl p-6 border border-slate-800 space-y-3">
             <button
               onClick={isConnected ? endCall : startCall}
-              className={`w-full py-3.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 ${
+              className={`w-full py-3.5 px-4 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 ${
                 isConnected
                   ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
-                  : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
+                  : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-fuchsia-600/30'
               }`}
             >
               {isConnected ? (
@@ -538,9 +552,9 @@ export default function VoiceConsole() {
                       : 'bg-indigo-600 text-white rounded-tr-sm'
                   }`}>
                     <div className={`text-[10px] font-semibold uppercase tracking-wider mb-1 ${
-                      isAgent ? 'text-indigo-400' : 'text-indigo-200'
+                      isAgent ? 'text-fuchsia-400' : 'text-violet-200'
                     }`}>
-                      {isAgent ? 'Alex (VoxLead Agent)' : 'You (Prospect)'}
+                      {isAgent ? 'Arohi (VoxLead Agent)' : 'You (Prospect)'}
                     </div>
                     <div>{msg.text}</div>
                   </div>

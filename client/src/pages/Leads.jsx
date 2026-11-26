@@ -92,11 +92,11 @@ export default function Leads() {
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
             Leads & BANT CRM
-            <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
+            <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/30">
               {mockLeads.length} Total Prospects
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">Real-time qualification signals extracted by Alex during voice conversations.</p>
+          <p className="text-xs text-slate-400 mt-1">Real-time qualification signals extracted by Arohi during voice conversations.</p>
         </div>
 
         {/* Search & Filters */}
@@ -118,7 +118,7 @@ export default function Leads() {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1 rounded-lg font-medium transition ${
-                  filter === f ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  filter === f ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-sm shadow-fuchsia-500/20' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 {f}
@@ -234,8 +234,8 @@ export default function Leads() {
 
             {/* AI Summary */}
             <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-800/40 space-y-1">
-              <span className="text-[10px] font-mono uppercase text-indigo-400 font-bold flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Voice AI Call Summary
+              <span className="text-[10px] font-mono uppercase text-fuchsia-400 font-bold flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-fuchsia-400" /> Arohi Voice AI Call Summary
               </span>
               <p className="text-xs text-slate-200 leading-relaxed">
                 {selectedLead.transcriptSummary}

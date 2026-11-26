@@ -40,10 +40,10 @@ async function runVoicePipelineTest() {
           logger.success(`3. Received Agent Greeting: "${msg.text}"`);
 
           // Send simulated user inquiry (asking in Hindi/Hinglish to test multilingual handling)
-          logger.info('4. Sending simulated multilingual user voice inquiry: "Hi Alex, aapka pricing model kya hai?"');
+          logger.info('4. Sending simulated multilingual user voice inquiry: "Hi Arohi, aapka pricing model kya hai?"');
           ws.send(JSON.stringify({
             type: 'text_input',
-            text: 'Hi Alex, aapka pricing model kya hai?',
+            text: 'Hi Arohi, aapka pricing model kya hai?',
           }));
         } else {
           testResults.receivedFinalAgentResponse = true;
