@@ -89,21 +89,27 @@ flowchart TB
 ## 📂 Implementation Roadmap & Progress
 
 - [x] **Phase 1: Project Architecture & Environment Scaffolding**
-  - Modular project structure, environment configuration, and logging infrastructure.
+  - Modular monorepo project structure, environment configuration, and logging infrastructure.
 - [x] **Phase 2 (Completed): Real-Time Voice Streaming Gateway (Module 1)**
   - [x] Node.js WebSocket gateway (`/ws/call`) with session connection lifecycle.
   - [x] Interactive browser-based Web Audio visualizer and test console (`/test-voice`).
   - [x] Voice agent persona and conversational guardrail prompt engineering.
   - [x] Deepgram Nova-2 STT streaming, ElevenLabs TTS streaming, and sentence-boundary chunking.
   - [x] Barge-in speech onset detection and instant audio buffer cancellation.
-- [ ] **Phase 3 (In Progress - 50% Pushed): AI Tool Calling & Grounded Discovery (Module 2)**
+- [x] **Phase 3 (Completed): AI Tool Calling & Grounded Discovery (Module 2)**
   - [x] Verified company knowledge grounding store (Pricing tiers, Features, Security/HIPAA specs).
   - [x] Google Calendar demo availability checking & appointment booking engine with Google Meet links.
   - [x] Function calling JSON schemas for `search_company_info`, `check_calendar_availability`, and `book_calendar_appointment`.
   - [x] BANT lead qualification scoring algorithm (0–100 scale).
-  - [ ] *[Next Push]* Full React Dashboard, Leads CRM table, and live UI badges.
-- [ ] **Phase 4: Full React Dashboard, Lead CRM & Analytics**
-- [ ] **Phase 5: BullMQ Async Summaries & Enterprise Hardening**
+  - [x] Dynamic real-time tool badges in conversation stream.
+- [x] **Phase 4 (Completed): Full React Dashboard, Lead CRM & Analytics (Module 8)**
+  - [x] Vite + React 18 SPA with Tailwind CSS and glassmorphism UI.
+  - [x] 1-Click Recruiter Demo Access authentication screen.
+  - [x] Executive Sales KPI Dashboard with interactive Recharts volume curves.
+  - [x] Live Voice Console with glowing 3D visualizer orb, waveform audio canvas, and live subtitles.
+  - [x] Leads & BANT CRM Table with status badges and detail drawers.
+  - [x] Booked Demos page with direct Google Meet join links.
+- [ ] **Phase 5: BullMQ Distributed Async Summaries & Enterprise Hardening**
 
 ---
 
@@ -113,34 +119,51 @@ flowchart TB
 - **Node.js**: v20 or higher
 - **npm**: v10 or higher
 
-### Installation
-1. Clone the repository:
+### Installation & Launch
+
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/muskanuppal08/VoxLeadAI.git
    cd VoxLeadAI
    ```
 
-2. Install backend dependencies:
+2. **Install dependencies for both server and client:**
+   ```bash
+   # Install server dependencies
+   cd server && npm install
+   
+   # Install client dependencies
+   cd ../client && npm install
+   cd ..
+   ```
+
+3. **Configure environment variables (optional):**
    ```bash
    cd server
-   npm install
-   ```
-
-3. Configure environment variables:
-   ```bash
    cp .env.example .env
-   # Add your API keys: OPENAI_API_KEY, DEEPGRAM_API_KEY, ELEVENLABS_API_KEY
+   # Add your API keys if desired: OPENAI_API_KEY, DEEPGRAM_API_KEY, ELEVENLABS_API_KEY
+   # (Note: Built-in intelligent browser voice fallbacks allow full testing even without keys!)
+   cd ..
    ```
 
-4. Start the server:
+4. **Start the Backend Server (Terminal 1):**
    ```bash
+   cd server
    npm start
+   # Server runs on http://localhost:5001
    ```
 
-5. Open the Interactive Voice Test Console in your browser:
+5. **Start the React Frontend Application (Terminal 2):**
+   ```bash
+   cd client
+   npm run dev
+   # React app runs on http://localhost:5173
    ```
-   http://localhost:5001/test-voice
-   ```
+
+6. **Open in Your Browser:**
+   - **Full React Dashboard & CRM Console:** [http://localhost:5173](http://localhost:5173) (Click *1-Click Recruiter Demo Access*)
+   - **Interactive Voice Test Console:** [http://localhost:5001/test-voice](http://localhost:5001/test-voice)
+   - **REST API Diagnostics:** [http://localhost:5001/api/v1/health](http://localhost:5001/api/v1/health)
 
 ---
 
